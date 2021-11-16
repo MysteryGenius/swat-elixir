@@ -1,9 +1,13 @@
 defmodule Learn.Plug do
 	import Plug.Conn
 
-	def init(opts), do: opts
+	def init(options), do: options
 
 	def call(conn, _opts) do
+		opts = Plug.Session.init(store: :ets, key: "_plugger", table: :session)
+    conn = Plug.Session.call(conn, opts)
+    conn = fetch_session(conn)
+
 		content =
 			"count.txt"
 			|> load_hits()
@@ -22,7 +26,7 @@ defmodule Learn.Plug do
 			{:ok, body}      	->
 				body
 			{:error, :enoent} ->
-				File.write!(filepath, "1")
+				File.write!(filepath, "0")
 				load_hits(filepath)
 		end
 	end
