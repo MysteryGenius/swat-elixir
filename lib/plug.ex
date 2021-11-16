@@ -36,9 +36,17 @@ defmodule Learn.Plug do
 		content
 	end
 
+	#========= Basic Flow =========#
 	# User hits the server
 	# Server loads the hits from a file
 	# Server increments the hits
 	# Server returns the hits
 	# Server saves the hits to a file
+
+	#========= Advanced Flow =========#
+	# User hits the server
+	# Server loads the hits from a file and stores it in cache
+	# Server increments the hits in cache
+	# Server returns the hits from cache
+	# Server saves the hits to a file every every 10 hits OR every 30 seconds (if the hits are less than 10)
 end
