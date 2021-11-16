@@ -16,11 +16,17 @@ defmodule Learn.Plug do
 	"""
 	def load_hits(filepath) do
 		case File.read(filepath) do
-			{:ok, body}      ->
+			{:ok, body}      	->
 				body
 			{:error, :enoent} ->
 				File.write!(filepath, "1")
 				load_hits(filepath)
 		end
 	end
+
+	# User hits the server
+	# Server loads the hits from a file
+	# Server increments the hits
+	# Server returns the hits
+	# Server saves the hits to a file
 end
