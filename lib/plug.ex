@@ -4,7 +4,10 @@ defmodule Learn.Plug do
 	def init(opts), do: opts
 
 	def call(conn, _opts) do
-		content = load_hits("count.txt")
+		content =
+			"count.txt"
+			|> load_hits()
+			|> increment_hits("count.txt")
 
 		conn
 		|> put_resp_content_type("text/plain")
@@ -22,6 +25,15 @@ defmodule Learn.Plug do
 				File.write!(filepath, "1")
 				load_hits(filepath)
 		end
+	end
+
+	@doc """
+	increment_hits/1 increments the hits in a file
+	"""
+	def increment_hits(body, filepath) do
+		content = "#{String.to_integer(body) + 1}"
+		File.write!(filepath, content)
+		content
 	end
 
 	# User hits the server
