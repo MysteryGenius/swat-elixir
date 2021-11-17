@@ -2,20 +2,17 @@ defmodule Learn.Plug do
 	import Plug.Conn
 	alias Learn.Tracker
 
+	@filepath "count.txt"
 
 	def init(options) do
-		Tracker.start_link(0)
+		Tracker.start_link(String.to_integer(load_hits(@filepath)))
 		options
 	end
 
 	def call(conn, _opts) do
 		Tracker.increment()
-		IO.inspect Tracker.curr_count()
-
-		content =
-			"count.txt"
-			|> load_hits()
-			|> increment_hits("count.txt")
+		Tracker.store(@filepath)
+		content = "#{Tracker.curr_count()}"
 
 		conn
 		|> put_resp_content_type("text/plain")
@@ -27,21 +24,12 @@ defmodule Learn.Plug do
 	"""
 	def load_hits(filepath) do
 		case File.read(filepath) do
-			{:ok, body}      	->
-				body
+			{:ok, content}      	->
+				content
 			{:error, :enoent} ->
 				File.write!(filepath, "0")
 				load_hits(filepath)
 		end
-	end
-
-	@doc """
-	increment_hits/1 increments the hits in a file
-	"""
-	def increment_hits(body, filepath) do
-		content = "#{String.to_integer(body) + 1}"
-		File.write!(filepath, content)
-		content
 	end
 
 	#========= Basic Flow =========#

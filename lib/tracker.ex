@@ -11,6 +11,10 @@ defmodule Learn.Tracker do
     GenServer.cast(__MODULE__, :increment)
   end
 
+  def store(filepath) do
+    GenServer.cast(__MODULE__, {:store, filepath})
+  end
+
   def curr_count() do
     GenServer.call(__MODULE__, :count)
   end
@@ -21,6 +25,11 @@ defmodule Learn.Tracker do
 
   def handle_cast(:increment, count) do
     {:noreply, count + 1}
+  end
+
+  def handle_cast({:store, filepath}, count) do
+		File.write!(filepath, "#{count}")
+    {:noreply, count}
   end
 
   def handle_call(:count, _from, count) do
