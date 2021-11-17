@@ -7,7 +7,7 @@ defmodule Learn.Tracker do
     GenServer.start_link(__MODULE__, count, name: __MODULE__)
   end
 
-  def increment() do
+  def increment do
     GenServer.cast(__MODULE__, :increment)
   end
 
@@ -15,7 +15,7 @@ defmodule Learn.Tracker do
     GenServer.cast(__MODULE__, {:store, filepath})
   end
 
-  def curr_count() do
+  def curr_count do
     GenServer.call(__MODULE__, :count)
   end
 

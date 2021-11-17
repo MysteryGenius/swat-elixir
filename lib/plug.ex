@@ -5,30 +5,45 @@ defmodule Learn.Plug do
 	@filepath "count.txt"
 
 	def init(options) do
-		Tracker.start_link(String.to_integer(load_hits(@filepath)))
+		count = String.to_integer(load_hits(@filepath))
+		:ets.new(:session, [:named_table, :public, read_concurrency: true])
+		Tracker.start_link(count)
 		options
 	end
 
 	def call(conn, _opts) do
 		Tracker.increment()
-		Tracker.store(@filepath)
 		content = "#{Tracker.curr_count()}"
 
 		conn
+		|> store_hits(@filepath)
 		|> put_resp_content_type("text/plain")
 		|> send_resp(200, content)
 	end
 
-	@doc """
-	load_hits/1 reads the hits from a file and returns the value
-	"""
-	def load_hits(filepath) do
+	#========= Abstraction Barrier =========#
+
+	defp load_hits(filepath) do
 		case File.read(filepath) do
 			{:ok, content}      	->
 				content
-			{:error, :enoent} ->
-				File.write!(filepath, "0")
-				load_hits(filepath)
+				{:error, :enoent} ->
+					File.write!(filepath, "0")
+					load_hits(filepath)
+				end
+			end
+
+	defp store_hits(conn, filepath) do
+		opts = Plug.Session.init(store: :ets, key: "_learn_session", secure: true, table: :session)
+    conn = Plug.Session.call(conn, opts)
+    conn = fetch_session(conn)
+		last_stored = if get_session(conn, :last_stored) == nil, do: 0, else: String.to_integer(get_session(conn, :last_stored))
+		IO.inspect last_stored
+		if last_stored == 0 || ((Tracker.curr_count() - last_stored) >= 10) do
+			Tracker.store(filepath)
+			put_session(conn, :last_stored, "#{Tracker.curr_count()}")
+		else
+			conn
 		end
 	end
 
