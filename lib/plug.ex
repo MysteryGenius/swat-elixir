@@ -1,12 +1,16 @@
 defmodule Learn.Plug do
 	import Plug.Conn
+	alias Learn.Tracker
 
-	def init(options), do: options
+
+	def init(options) do
+		Tracker.start_link(0)
+		options
+	end
 
 	def call(conn, _opts) do
-		opts = Plug.Session.init(store: :ets, key: "_plugger", table: :session)
-    conn = Plug.Session.call(conn, opts)
-    conn = fetch_session(conn)
+		Tracker.increment()
+		IO.inspect Tracker.curr_count()
 
 		content =
 			"count.txt"
